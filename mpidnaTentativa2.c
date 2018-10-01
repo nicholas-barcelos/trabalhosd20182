@@ -21,6 +21,11 @@ int my_rank, processos;
 // Inicio, fim e tamanho da partição
 int start, end, tamDaParticao;
 
+// Tags
+#define PART_START 100
+#define PART_END 200
+#define PART_SIZE 300
+
 // Boyers-Moore-Hospool-Sunday algorithm for string matching
 int bmhs(char *string, int n, char *substr, int m) {
 
@@ -95,7 +100,8 @@ int main(int argc, char** argv) {
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &processos); 
+	MPI_Comm_size(MPI_COMM_WORLD, &processos);
+	MPI_Status status; 
 
 	bases = (char*) malloc(sizeof(char) * 1000001);
 	if (bases == NULL) {
@@ -164,16 +170,50 @@ int main(int argc, char** argv) {
                 start -= (strlen(str) - 1);
             }
 			if(my_rank + 1 == processos){
-				if(end!=strlen(bases)-1)
-					end = strlen(bases)-1;
+				if(end != strlen(bases) - 1){
+					end = strlen(bases) - 1;
+				}
 			}
 			else
+			{
             	if(end + (strlen(str) - 1) < strlen(bases)){
                 	end += (strlen(str) - 1);
             	}
+			}
 
-			tamDaParticao = end-start;
-            
+			tamDaParticao = end - start;
+
+            if(my_rank == MASTER){
+				int proc_start[processos], proc_end[processos], proc_tamDaParticao[processos];
+				proc_start[0] = start;
+				proc_end[0] = end;
+				proc_tamDaParticao[0] = tamDaParticao;
+				
+				printf("rank: %d, start: %d, end: %d, tam: %d\n",
+                       0,proc_start[0],proc_end[0],proc_tamDaParticao[0]);
+				printf("vai pro for\n");
+				
+				int source;
+				for(source = 1; source < processos; source++) {      
+					MPI_Recv(&proc_start + source, 1, MPI_INT, source, PART_START,
+					         MPI_COMM_WORLD, &status);
+					MPI_Recv(&proc_end + source, 1, MPI_INT, source, PART_END,
+					         MPI_COMM_WORLD, &status);
+					MPI_Recv(&proc_tamDaParticao + source, 1, MPI_INT, source, PART_SIZE,
+					         MPI_COMM_WORLD, &status);
+					printf("rank: %d, start: %d, end: %d, tam: %d\n",
+					       source,proc_start[source],proc_end[source], proc_tamDaParticao[source]);
+				}
+			}else{
+				MPI_Send(&start, 1, MPI_INT, MASTER,
+				         PART_START, MPI_COMM_WORLD);
+				MPI_Send(&end, 1, MPI_INT, MASTER,
+				         PART_END, MPI_COMM_WORLD);
+				MPI_Send(&tamDaParticao, 1, MPI_INT, MASTER,
+				         PART_SIZE, MPI_COMM_WORLD);								
+			}
+
+			//paralelizar
 			result = bmhs(bases, strlen(bases), str, strlen(str)); //retorna a posição onde foi encontrada a substring
 			if (result > 0) {
 				fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
