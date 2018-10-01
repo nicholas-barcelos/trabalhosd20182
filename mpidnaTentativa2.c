@@ -158,16 +158,21 @@ int main(int argc, char** argv) {
             //parte para paralelizar
             start = (strlen(bases) / processos) * my_rank;
             end = (strlen(bases) / processos) * (my_rank + 1);
-            tamDaParticao = strlen(bases) / processos;
+            
 
-            if(start - (strlen(str) - 1) < 0){
+            if(start - (strlen(str) - 1) > 0){
                 start -= (strlen(str) - 1);
-                tamDaParticao += strlen(str) - 1;
             }
-            if(end - (strlen(str) - 1) > strlen(bases)){
-                end -= (strlen(str) - 1);
-                tamDaParticao += strlen(str) - 1;
-            }
+			if(my_rank + 1 == processos){
+				if(end!=strlen(bases)-1)
+					end = strlen(bases)-1;
+			}
+			else
+            	if(end + (strlen(str) - 1) < strlen(bases)){
+                	end += (strlen(str) - 1);
+            	}
+
+			tamDaParticao = end-start;
             
 			result = bmhs(bases, strlen(bases), str, strlen(str)); //retorna a posição onde foi encontrada a substring
 			if (result > 0) {
