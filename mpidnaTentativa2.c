@@ -6,6 +6,21 @@
 // MAX char table (ASCII)
 #define MAX 256
 
+// Processo mestre
+#define MASTER 0
+
+// Arquivos: dna.in, query.in, dna.out
+FILE *fdatabase, *fquery, *fout;
+
+// Strings: bases lidas do dna.in e queries do query.in
+char *bases, *str;
+
+// Rank do processo e qtd de processos
+int my_rank, processos;
+
+// Inicio, fim e tamanho da partição
+int start, end, tamDaParticao;
+
 // Boyers-Moore-Hospool-Sunday algorithm for string matching
 int bmhs(char *string, int n, char *substr, int m) {
 
@@ -34,8 +49,6 @@ int bmhs(char *string, int n, char *substr, int m) {
 
 	return -1;
 }
-
-FILE *fdatabase, *fquery, *fout;
 
 void openfiles() {
 
@@ -78,19 +91,11 @@ void remove_eol(char *line) {
 	}
 }
 
-char *bases;
-char *str;
+int main(int argc, char** argv) {
 
-int main(void) {
-    int my_rank; 
-	int processos;
-
-    MPI_Init(&argc, &argv);
+	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &processos); 
-
-    int start, end, tamDaParticao;
-
 
 	bases = (char*) malloc(sizeof(char) * 1000001);
 	if (bases == NULL) {
@@ -151,22 +156,19 @@ int main(void) {
 
 
             //parte para paralelizar
-            start=(strlen(bases)/processos)*my_rank;
-            end=(strlen(bases)/processos)*(my_rank+1);
-            tamDaParticao=strlen(bases)/processos;
+            start = (strlen(bases) / processos) * my_rank;
+            end = (strlen(bases) / processos) * (my_rank + 1);
+            tamDaParticao = strlen(bases) / processos;
 
-            if(start-(strlen(str)-1)<0){
-                start=-(strlen(str)-1);
-                tamDaParticao+=strlen(str)-1;
+            if(start - (strlen(str) - 1) < 0){
+                start -= (strlen(str) - 1);
+                tamDaParticao += strlen(str) - 1;
             }
-            if(end-(strlen(str)-1)>strlen(bases)){
-                end=-(strlen(str)-1);
-                tamDaParticao+=strlen(str)-1;
+            if(end - (strlen(str) - 1) > strlen(bases)){
+                end -= (strlen(str) - 1);
+                tamDaParticao += strlen(str) - 1;
             }
             
-
-
-
 			result = bmhs(bases, strlen(bases), str, strlen(str)); //retorna a posição onde foi encontrada a substring
 			if (result > 0) {
 				fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
