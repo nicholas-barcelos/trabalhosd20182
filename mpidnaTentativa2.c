@@ -153,7 +153,7 @@ int main(void) {
             //parte para paralelizar
             start=(strlen(bases)/processos)*my_rank;
             end=(strlen(bases)/processos)*(my_rank+1);
-            tamDaParticao=str(bases)/processos;
+            tamDaParticao=strlen(bases)/processos;
 
             if(start-(strlen(str)-1)<0){
                 start=-(strlen(str)-1);
