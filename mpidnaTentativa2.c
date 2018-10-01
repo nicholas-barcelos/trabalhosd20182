@@ -230,5 +230,7 @@ int main(int argc, char** argv) {
 	free(str);
 	free(bases);
 
+	MPI_Finalize();
+
 	return EXIT_SUCCESS;
 }
