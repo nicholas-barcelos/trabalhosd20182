@@ -86,7 +86,7 @@ int main(void) {
 		perror("malloc bases");
 		exit(EXIT_FAILURE);
 	}
-	str = (char*) malloc(sizeof(char) * 1000001);
+	str = (char*) malloc(sizeof(char) * 1000001); //1milhão de chars
 	if (str == NULL) {
 		perror("malloc str");
 		exit(EXIT_FAILURE);
@@ -98,13 +98,13 @@ int main(void) {
 	char line[100];
 	int i, found, result;
 
-	fgets(desc_query, 100, fquery);
+	fgets(desc_query, 100, fquery); //pega o nome da query
 	remove_eol(desc_query);
 
 	while (!feof(fquery)) {
-		fprintf(fout, "%s\n", desc_query);
+		fprintf(fout, "%s\n", desc_query); //escreve o nome da query na saida
 		// read query string
-		fgets(line, 100, fquery);
+		fgets(line, 100, fquery); //pega a query
 		remove_eol(line);
 		str[0] = 0;
 		i = 0;
@@ -116,31 +116,30 @@ int main(void) {
 			i += 80;
 		} while (line[0] != '>');
 		strcpy(desc_query, line);
-
+		
         // read database and search
 		found = 0;
 		fseek(fdatabase, 0, SEEK_SET);
-		fgets(line, 100, fdatabase);
+		fgets(line, 100, fdatabase); //pega de 100 em 100 de fdatabase
 		remove_eol(line);
 
 		while (!feof(fdatabase)) {
-			strcpy(desc_dna, line);
+			strcpy(desc_dna, line); //pega nome da sequencia
 			bases[0] = 0;
 			i = 0;
 			fgets(line, 100, fdatabase);
 			remove_eol(line);
 			
 			do {
-				strcat(bases + i, line);
+				strcat(bases + i, line); //concatena bases com a sequencia lida de databases, colocando 
 				if (fgets(line, 100, fdatabase) == NULL)
 					break;
 				remove_eol(line);
 				i += 80;
 			} while (line[0] != '>');
-
-			result = bmhs(bases, strlen(bases), str, strlen(str));
+			result = bmhs(bases, strlen(bases), str, strlen(str)); //retorna a posição onde foi encontrada a substring
 			if (result > 0) {
-				fprintf(fout, "%s\n%d\n", desc_dna, result);
+				fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
 				found++;
 			}
 		}
