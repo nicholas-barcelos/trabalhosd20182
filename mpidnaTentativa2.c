@@ -223,6 +223,7 @@ int main(int argc, char** argv) {
 		}
 
 		if (!found)
+			printf("\nNOT FOUND\n");
 			fprintf(fout, "NOT FOUND\n");
 	}
 
