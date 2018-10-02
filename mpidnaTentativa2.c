@@ -163,10 +163,23 @@ int main(int argc, char** argv) {
 
             //parte para paralelizar
             start = (strlen(bases) / processos) * my_rank;
-            end = (strlen(bases) / processos) * (my_rank + 1);
-            
+            end = ((strlen(bases) / processos) * (my_rank + 1))-1;
+
+			if(my_rank + 1 == processos){
+				if(end != strlen(bases) - 1){
+					end = strlen(bases) - 1;
+				}
+			}
+			else{
+            	end += (strlen(str) - 1);
+			}
+
+			/*if(my_rank==0)
+            	printf("%d, start %d, end %d\n",my_rank, start, end);
 
             if(start - (strlen(str) - 1) > 0){
+				if(my_rank==0)
+					printf("boolean %d\n",start - (strlen(str) - 1) > 0);
                 start -= (strlen(str) - 1);
             }
 			if(my_rank + 1 == processos){
@@ -179,9 +192,19 @@ int main(int argc, char** argv) {
             	if(end + (strlen(str) - 1) < strlen(bases)){
                 	end += (strlen(str) - 1);
             	}
-			}
+			}*/
+			
 
 			tamDaParticao = end - start;
+
+			if(my_rank == 0){
+				printf("rank: %d, start: %d, end: %d, tam: %d\n",
+                       my_rank, start, end, tamDaParticao);
+			}
+			if(my_rank == 1){
+				printf("rank: %d, start: %d, end: %d, tam: %d\n",
+                       my_rank, start, end, tamDaParticao);
+			}
 
             if(my_rank == MASTER){
 				int proc_start[processos], proc_end[processos], proc_tamDaParticao[processos];
