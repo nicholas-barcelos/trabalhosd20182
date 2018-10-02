@@ -210,14 +210,8 @@ int main(int argc, char** argv) {
 					   my_rank,start,end, tamDaParticao);	*/							
 			}
 
-			char* test =  (char*) malloc (sizeof(char) * (tamDaParticao+1));
-			strncpy(test, bases+start, tamDaParticao);
-			if(my_rank==0){
-				printf("\n\n\n\n tamanho da sub string do rank 0 = %d \n\n\n\n", strlen(test));
-				for (int i = 0 ; test[i] != '\0' ; ++i){
-					printf("ACHOU\n");
-				}
-			}
+			char* substring =  (char*) malloc (sizeof(char) * (tamDaParticao+1));
+			strncpy(substring, bases+start, tamDaParticao);
 
 			//paralelizar
 			result = bmhs(bases, strlen(bases), str, strlen(str)); //retorna a posição onde foi encontrada a substring
