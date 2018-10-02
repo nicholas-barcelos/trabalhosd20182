@@ -173,38 +173,10 @@ int main(int argc, char** argv) {
 			else{
             	end += (strlen(str) - 1);
 			}
-
-			/*if(my_rank==0)
-            	printf("%d, start %d, end %d\n",my_rank, start, end);
-
-            if(start - (strlen(str) - 1) > 0){
-				if(my_rank==0)
-					printf("boolean %d\n",start - (strlen(str) - 1) > 0);
-                start -= (strlen(str) - 1);
-            }
-			if(my_rank + 1 == processos){
-				if(end != strlen(bases) - 1){
-					end = strlen(bases) - 1;
-				}
-			}
-			else
-			{
-            	if(end + (strlen(str) - 1) < strlen(bases)){
-                	end += (strlen(str) - 1);
-            	}
-			}*/
 			
 
-			tamDaParticao = end - start;
+			tamDaParticao = end - start + 1;
 
-			if(my_rank == 0){
-				printf("rank: %d, start: %d, end: %d, tam: %d\n",
-                       my_rank, start, end, tamDaParticao);
-			}
-			if(my_rank == 1){
-				printf("rank: %d, start: %d, end: %d, tam: %d\n",
-                       my_rank, start, end, tamDaParticao);
-			}
 
             if(my_rank == MASTER){
 				int proc_start[processos], proc_end[processos], proc_tamDaParticao[processos];
@@ -234,8 +206,17 @@ int main(int argc, char** argv) {
 				         PART_END, MPI_COMM_WORLD);
 				MPI_Send(&tamDaParticao, 1, MPI_INT, MASTER,
 				         PART_SIZE, MPI_COMM_WORLD);
-				printf("slave{\n rank: %d, start: %d, end: %d, tam: %d\n}\n",
-					   my_rank,start,end, tamDaParticao);								
+				/*printf("slave{\n rank: %d, start: %d, end: %d, tam: %d\n}\n",
+					   my_rank,start,end, tamDaParticao);	*/							
+			}
+
+			char* test =  (char*) malloc (sizeof(char) * (tamDaParticao+1));
+			strncpy(test, bases+start, tamDaParticao);
+			if(my_rank==0){
+				printf("\n\n\n\n tamanho da sub string do rank 0 = %d \n\n\n\n", strlen(test));
+				for (int i = 0 ; test[i] != '\0' ; ++i){
+					printf("ACHOU\n");
+				}
 			}
 
 			//paralelizar
