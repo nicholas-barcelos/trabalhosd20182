@@ -103,6 +103,7 @@ int main(int argc, char** argv) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &processos);
 	MPI_Status status; 
+	MPI_Request request;
 
 	int tag = 0;
 
@@ -193,10 +194,11 @@ int main(int argc, char** argv) {
 				//fprintf(fout, "%s\n", desc_query); //escreve o nome da query na saida
 				int outroResult;
 				for(int i = 1; i < processos; i++){
-					MPI_Recv(&outroResult, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					MPI_Recv(&outroResult, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
 					if(result>outroResult)
 						result=outroResult;
 				}
+				tag++;
 				//printf("result = %d\n",result);
 
 				if (result < INT_MAX) {
@@ -208,7 +210,8 @@ int main(int argc, char** argv) {
 			else{
 				if(result < INT_MAX)
 					result+=start;
-				MPI_Send(&result, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+				MPI_Isend(&result, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &request);
+				tag++;
 			}
 
 
