@@ -217,6 +217,12 @@ int main(int argc, char** argv) {
 						result=outroResult;
 				}
 				printf("result = %d\n",result);
+
+				if (result < INT_MAX) {
+				//printf("\nresult: %d, rank:%d\nsubstring:%s\nstr:%s\n\n", result+start, my_rank, substring, str);
+				fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
+				found++;
+				}
 			}
 			else{
 				if(result < INT_MAX)
@@ -236,9 +242,9 @@ int main(int argc, char** argv) {
 			free(substring);
 		}
 
-		if (!found){
+		if (!found&&my_rank==MASTER){
 			//printf("\nNOT FOUND\n");
-			//fprintf(fout, "NOT FOUND\n");
+			fprintf(fout, "NOT FOUND\n");
 		}
 	}
 
