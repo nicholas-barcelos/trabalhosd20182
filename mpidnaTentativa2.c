@@ -218,11 +218,11 @@ int main(int argc, char** argv) {
 				
 				int source;
 				for(source = 1; source < processos; source++) {      
-					MPI_Recv(&proc_start + source, 1, MPI_INT, source, PART_START,
+					MPI_Recv(&proc_start[source], 1, MPI_INT, source, PART_START,
 					         MPI_COMM_WORLD, &status);
-					MPI_Recv(&proc_end + source, 1, MPI_INT, source, PART_END,
+					MPI_Recv(&proc_end[source], 1, MPI_INT, source, PART_END,
 					         MPI_COMM_WORLD, &status);
-					MPI_Recv(&proc_tamDaParticao + source, 1, MPI_INT, source, PART_SIZE,
+					MPI_Recv(&proc_tamDaParticao[source], 1, MPI_INT, source, PART_SIZE,
 					         MPI_COMM_WORLD, &status);
 					printf("rank: %d, start: %d, end: %d, tam: %d\n",
 					       source,proc_start[source],proc_end[source], proc_tamDaParticao[source]);
@@ -233,7 +233,9 @@ int main(int argc, char** argv) {
 				MPI_Send(&end, 1, MPI_INT, MASTER,
 				         PART_END, MPI_COMM_WORLD);
 				MPI_Send(&tamDaParticao, 1, MPI_INT, MASTER,
-				         PART_SIZE, MPI_COMM_WORLD);								
+				         PART_SIZE, MPI_COMM_WORLD);
+				printf("slave{\n rank: %d, start: %d, end: %d, tam: %d\n}\n",
+					   my_rank,start,end, tamDaParticao);								
 			}
 
 			//paralelizar
