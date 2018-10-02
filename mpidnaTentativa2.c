@@ -174,9 +174,7 @@ int main(int argc, char** argv) {
             	end += (strlen(str) - 1);
 			}
 			
-
 			tamDaParticao = end - start + 1;
-
 
             if(my_rank == MASTER){
 				int proc_start[processos], proc_end[processos], proc_tamDaParticao[processos];
@@ -216,21 +214,27 @@ int main(int argc, char** argv) {
 			//paralelizar
 			result = bmhs(substring, tamDaParticao, str, strlen(str)); //retorna a posição onde foi encontrada a substring
 			if (result > 0) {
-				printf("\n%d\n", result+start);
-				fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
+				printf("\nresult: %d, rank:%d\nsubstring:%s\nstr:%s\n\n", 
+                       result+start, my_rank, substring, str);
+				//fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
 				found++;
 			}
+
+			// DESALOCAR A SUBSTRING DA BASE
+			free(substring);
 		}
 
-		if (!found)
+		if (!found){
 			printf("\nNOT FOUND\n");
-			fprintf(fout, "NOT FOUND\n");
+			//fprintf(fout, "NOT FOUND\n");
+		}
 	}
 
 	closefiles();
 
 	free(str);
 	free(bases);
+
 
 	MPI_Finalize();
 
