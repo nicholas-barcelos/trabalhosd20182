@@ -184,9 +184,9 @@ int main(int argc, char** argv) {
 				proc_end[0] = end;
 				proc_tamDaParticao[0] = tamDaParticao;
 				
-				printf("rank: %d, start: %d, end: %d, tam: %d\n",
+				/*printf("rank: %d, start: %d, end: %d, tam: %d\n",
                        0,proc_start[0],proc_end[0],proc_tamDaParticao[0]);
-				printf("vai pro for\n");
+				printf("vai pro for\n");*/
 				
 				int source;
 				for(source = 1; source < processos; source++) {      
@@ -196,8 +196,8 @@ int main(int argc, char** argv) {
 					         MPI_COMM_WORLD, &status);
 					MPI_Recv(&proc_tamDaParticao[source], 1, MPI_INT, source, PART_SIZE,
 					         MPI_COMM_WORLD, &status);
-					printf("rank: %d, start: %d, end: %d, tam: %d\n",
-					       source,proc_start[source],proc_end[source], proc_tamDaParticao[source]);
+					/*printf("rank: %d, start: %d, end: %d, tam: %d\n",
+					       source,proc_start[source],proc_end[source], proc_tamDaParticao[source]);*/
 				}
 			}else{
 				MPI_Send(&start, 1, MPI_INT, MASTER,
@@ -214,8 +214,9 @@ int main(int argc, char** argv) {
 			strncpy(substring, bases+start, tamDaParticao);
 
 			//paralelizar
-			result = bmhs(bases, strlen(bases), str, strlen(str)); //retorna a posição onde foi encontrada a substring
+			result = bmhs(substring, tamDaParticao, str, strlen(str)); //retorna a posição onde foi encontrada a substring
 			if (result > 0) {
+				printf("\n%d\n", result+start);
 				fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
 				found++;
 			}
