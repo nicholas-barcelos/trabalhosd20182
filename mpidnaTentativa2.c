@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mpi.h>
+#include <limits.h>
 
 // MAX char table (ASCII)
 #define MAX 256
@@ -52,7 +53,7 @@ int bmhs(char *string, int n, char *substr, int m) {
 		i = i + d[(int) string[i + 1]];
 	}
 
-	return -1;
+	return INT_MAX;
 }
 
 void openfiles() {
@@ -176,15 +177,12 @@ int main(int argc, char** argv) {
 			
 			tamDaParticao = end - start + 1;
 
-            if(my_rank == MASTER){
+            /*if(my_rank == MASTER){
 				int proc_start[processos], proc_end[processos], proc_tamDaParticao[processos];
 				proc_start[0] = start;
 				proc_end[0] = end;
 				proc_tamDaParticao[0] = tamDaParticao;
 				
-				/*printf("rank: %d, start: %d, end: %d, tam: %d\n",
-                       0,proc_start[0],proc_end[0],proc_tamDaParticao[0]);
-				printf("vai pro for\n");*/
 				
 				int source;
 				for(source = 1; source < processos; source++) {      
@@ -194,8 +192,6 @@ int main(int argc, char** argv) {
 					         MPI_COMM_WORLD, &status);
 					MPI_Recv(&proc_tamDaParticao[source], 1, MPI_INT, source, PART_SIZE,
 					         MPI_COMM_WORLD, &status);
-					/*printf("rank: %d, start: %d, end: %d, tam: %d\n",
-					       source,proc_start[source],proc_end[source], proc_tamDaParticao[source]);*/
 				}
 			}else{
 				MPI_Send(&start, 1, MPI_INT, MASTER,
@@ -203,19 +199,35 @@ int main(int argc, char** argv) {
 				MPI_Send(&end, 1, MPI_INT, MASTER,
 				         PART_END, MPI_COMM_WORLD);
 				MPI_Send(&tamDaParticao, 1, MPI_INT, MASTER,
-				         PART_SIZE, MPI_COMM_WORLD);
-				/*printf("slave{\n rank: %d, start: %d, end: %d, tam: %d\n}\n",
-					   my_rank,start,end, tamDaParticao);	*/							
-			}
+				         PART_SIZE, MPI_COMM_WORLD);				
+			}*/
 
 			char* substring =  (char*) malloc (sizeof(char) * (tamDaParticao+1));
 			strncpy(substring, bases+start, tamDaParticao);
 
 			//paralelizar
 			result = bmhs(substring, tamDaParticao, str, strlen(str)); //retorna a posição onde foi encontrada a substring
-			if (result > 0) {
-				printf("\nresult: %d, rank:%d\nsubstring:%s\nstr:%s\n\n", 
-                       result+start, my_rank, substring, str);
+			
+
+			if(my_rank == MASTER){
+				int outroResult;
+				for(int i = 1; i < processos; i++){
+					MPI_Recv(&outroResult, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					if(result>outroResult)
+						result=outroResult;
+				}
+				printf("result = %d\n",result);
+			}
+			else{
+				if(result < INT_MAX)
+					result+=start;
+				MPI_Send(&result, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+			}
+
+
+
+			if (result < INT_MAX) {
+				//printf("\nresult: %d, rank:%d\nsubstring:%s\nstr:%s\n\n", result+start, my_rank, substring, str);
 				//fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
 				found++;
 			}
@@ -225,7 +237,7 @@ int main(int argc, char** argv) {
 		}
 
 		if (!found){
-			printf("\nNOT FOUND\n");
+			//printf("\nNOT FOUND\n");
 			//fprintf(fout, "NOT FOUND\n");
 		}
 	}
