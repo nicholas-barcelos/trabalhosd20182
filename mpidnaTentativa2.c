@@ -104,6 +104,8 @@ int main(int argc, char** argv) {
 	MPI_Comm_size(MPI_COMM_WORLD, &processos);
 	MPI_Status status; 
 
+	int tag = 0;
+
 	bases = (char*) malloc(sizeof(char) * 1000001);
 	if (bases == NULL) {
 		perror("malloc bases");
@@ -125,7 +127,9 @@ int main(int argc, char** argv) {
 	remove_eol(desc_query);
 
 	while (!feof(fquery)) {
-		fprintf(fout, "%s\n", desc_query); //escreve o nome da query na saida
+		if(my_rank==MASTER){
+			fprintf(fout, "%s\n", desc_query); //escreve o nome da query na saida
+		}
 		// read query string
 		fgets(line, 100, fquery); //pega a query
 		remove_eol(line);
@@ -177,51 +181,28 @@ int main(int argc, char** argv) {
 			
 			tamDaParticao = end - start + 1;
 
-            /*if(my_rank == MASTER){
-				int proc_start[processos], proc_end[processos], proc_tamDaParticao[processos];
-				proc_start[0] = start;
-				proc_end[0] = end;
-				proc_tamDaParticao[0] = tamDaParticao;
-				
-				
-				int source;
-				for(source = 1; source < processos; source++) {      
-					MPI_Recv(&proc_start[source], 1, MPI_INT, source, PART_START,
-					         MPI_COMM_WORLD, &status);
-					MPI_Recv(&proc_end[source], 1, MPI_INT, source, PART_END,
-					         MPI_COMM_WORLD, &status);
-					MPI_Recv(&proc_tamDaParticao[source], 1, MPI_INT, source, PART_SIZE,
-					         MPI_COMM_WORLD, &status);
-				}
-			}else{
-				MPI_Send(&start, 1, MPI_INT, MASTER,
-				         PART_START, MPI_COMM_WORLD);
-				MPI_Send(&end, 1, MPI_INT, MASTER,
-				         PART_END, MPI_COMM_WORLD);
-				MPI_Send(&tamDaParticao, 1, MPI_INT, MASTER,
-				         PART_SIZE, MPI_COMM_WORLD);				
-			}*/
 
 			char* substring =  (char*) malloc (sizeof(char) * (tamDaParticao+1));
 			strncpy(substring, bases+start, tamDaParticao);
 
-			//paralelizar
+			
 			result = bmhs(substring, tamDaParticao, str, strlen(str)); //retorna a posição onde foi encontrada a substring
 			
 
 			if(my_rank == MASTER){
+				//fprintf(fout, "%s\n", desc_query); //escreve o nome da query na saida
 				int outroResult;
 				for(int i = 1; i < processos; i++){
 					MPI_Recv(&outroResult, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 					if(result>outroResult)
 						result=outroResult;
 				}
-				printf("result = %d\n",result);
+				//printf("result = %d\n",result);
 
 				if (result < INT_MAX) {
-				//printf("\nresult: %d, rank:%d\nsubstring:%s\nstr:%s\n\n", result+start, my_rank, substring, str);
-				fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
-				found++;
+					//printf("\nresult: %d, rank:%d\nsubstring:%s\nstr:%s\n\n", result+start, my_rank, substring, str);
+					fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
+					found++;
 				}
 			}
 			else{
@@ -232,18 +213,11 @@ int main(int argc, char** argv) {
 
 
 
-			if (result < INT_MAX) {
-				//printf("\nresult: %d, rank:%d\nsubstring:%s\nstr:%s\n\n", result+start, my_rank, substring, str);
-				//fprintf(fout, "%s\n%d\n", desc_dna, result);//escreve o nome da sequencia onde foi encontrada e a posição
-				found++;
-			}
-
 			// DESALOCAR A SUBSTRING DA BASE
 			free(substring);
 		}
 
 		if (!found&&my_rank==MASTER){
-			//printf("\nNOT FOUND\n");
 			fprintf(fout, "NOT FOUND\n");
 		}
 	}
