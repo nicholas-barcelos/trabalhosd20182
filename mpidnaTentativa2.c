@@ -102,7 +102,8 @@ int main(int argc, char** argv) {
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &processos);
-	MPI_Status status; 
+	MPI_Status status;
+	clock_t begin = clock();
 
 	int tag = 0;
 
@@ -226,8 +227,13 @@ int main(int argc, char** argv) {
 
 	free(str);
 	free(bases);
-
-
+	
+	if(my_rank==MASTER){
+		clock_t end = clock();
+		double time = (double) (end - begin)/CLOCKS_PER_SEC;
+		printf("O processamento da matriz de %dx%d levou %f segundos\n", size, size, time);
+	}
+	
 	MPI_Finalize();
 
 	return EXIT_SUCCESS;
