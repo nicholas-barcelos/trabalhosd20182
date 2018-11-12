@@ -3,6 +3,7 @@
 #include <string.h>
 #include <mpi.h>
 #include <limits.h>
+#include <time.h>
 
 // MAX char table (ASCII)
 #define MAX 256
