@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
 	if(my_rank==MASTER){
 		clock_t end = clock();
 		double time = (double) (end - begin)/CLOCKS_PER_SEC;
-		printf("O processamento da matriz de %dx%d levou %f segundos\n", size, size, time);
+		printf("O processamento levou %f segundos\n", time);
 	}
 	
 	MPI_Finalize();
